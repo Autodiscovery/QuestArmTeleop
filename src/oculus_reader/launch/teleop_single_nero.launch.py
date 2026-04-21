@@ -48,6 +48,7 @@ def generate_launch_description():
         executable="pub_pose.py",
         name="pub_pose_node",
         output="screen",
+        # pika frame to arm ee frame
         arguments=["--ros-args", "-p", "ros_to_arm_rpy:=[-1.5708, 0.0, 0.0]"],
     )
 

@@ -89,7 +89,7 @@ adb install 路径/teleop-debug.apk
 
 oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮的工具。
 
-以VR眼镜作为参考帧，将手柄的与VR眼镜TF关系的 delta pose 传输 IK 解算，最后将解算出的关节角数据发布出来。
+运行流程：首先从 pub_pose.py 获取到手柄 pose 数据，在 pub_delta_pose.py 订阅该数据并进行处理，发布 delta pose 数据同时利用手柄扳机键来控制夹爪开合，最后在 arm_ik_pose_node.py 中订阅 delta pose，IK解算成机械臂主体的几个关节角数据并以话题形式发出，机械臂订阅该话题完成控制。
 
 ```bash
 .
@@ -114,21 +114,21 @@ oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮
         │   └── teleop-debug.apk
         ├── CMakeLists.txt
         ├── config
-        │   ├── arm_ik_pose_node.nero.yaml
-        │   ├── arm_ik_pose_node.piper_x.yaml
+        │   ├── arm_ik_pose_node.nero.yaml  # nero IK 配置文件
+        │   ├── arm_ik_pose_node.piper_x.yaml  # piper x 配置文件
         │   └── oculus_reader.rviz
         ├── launch
         │   ├── teleop_single_nero.launch.py   # 开启遥操nero程序
         │   └── teleop_single_piper_x.launch.py  # 开启遥操piper x程序
         ├── package.xml
         └── scripts
-            ├── arm_ik_pose_node.py
-            ├── buttons_parser.py
+            ├── arm_ik_pose_node.py  # IK 核心文件 
+            ├── buttons_parser.py  # 手柄按键处理
             ├── FPS_counter.py
             ├── install.py
-            ├── oculus_reader.py
-            ├── pub_delta_pose.py
-            ├── pub_pose.py
+            ├── oculus_reader.py  
+            ├── pub_delta_pose.py  # 处理手柄pose数据并发出delta pose话题 
+            ├── pub_pose.py  # 发布手柄 pose 话题
             └── transformations.py
 ```
 
@@ -147,6 +147,8 @@ bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/can_activate.sh
 ```
 
 2、启动遥操机械臂
+
+请在开始遥操前查看[操作说明](#操作说明)
 
 ```bash
 source ~/QuestArmTeleop/install/setup.bash 
@@ -185,15 +187,11 @@ Run `adb devices` to verify that the device is visible.
 
 > 注意⚠️：
 >
-> - 请一定要确保VR屏幕保持常亮，否则TF会乱飘导致遥操作机械臂乱飞，我们建议在VR眼镜里面拿东西遮住感应器，使其保持常亮状态。
-> - 开启程序后，请一定要确保手柄在VR视野里以及rviz里面的坐标稳定不会乱飘，然后按住按键“A”||“X”使机械臂复位，复位后才可进行遥操做，否则机械臂也会乱飞。
-> - 在遥操 piper 启动后，请注意观察网页端的机械臂是否乱飘，
-
-- 遥操单臂使用右手手柄，开始遥操前确保机械臂回到初始姿态，按住按键 “A” 能使机械臂回到初始位置，长按按键 “B” 为遥操机械臂，松开为停止控制。遥操双臂同理。  
-
-- 为了操作的人身安全以及减少对机械臂的损害，在遥操结束后，请确保机械臂回到初始位置附件再按下“A”||“X”键复位。
-
-
+> - 请一定要确保VR屏幕保持常亮，否则 pose 会乱飘导致遥操作机械臂乱飞，我们建议在VR眼镜里面拿东西遮住感应器，使其保持常亮状态。
+> - 开启程序后，请一定要确保手柄在VR视野里以及rviz里面的坐标稳定不会乱飘，且手柄的TF坐标系是跟机械臂末端坐标系是对齐的（这部分需要在launch文件中修改ros_to_arm_rpy参数）方可开启遥操作。
+> - 手柄与机械臂末端的坐标系对齐很重要，这直接决定了遥操的体验感。
+> - 控制单臂需要用右手手柄，按住“A”键开始遥操，按住“B”键停止遥操。
+> - 本程序支持无线遥操作，流程程度取决于你当下的网络连接速度。
 
 ## 手柄按键说明
 
