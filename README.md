@@ -155,7 +155,11 @@ source ~/QuestArmTeleop/install/setup.bash
 
 conda activate vt
 
+# 启动遥操nero
 ros2 launch  oculus_reader teleop_single_nero.launch.py 
+
+# 启动遥操 piper x
+ros2 launch  oculus_reader teleop_single_piper_x.launch.py
 ```
 
 在启动遥操代码时出现该错误时：
