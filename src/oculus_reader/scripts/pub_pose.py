@@ -47,7 +47,9 @@ class OculusPublisher(Node):
             [0.0, 1.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 1.0]
         ], dtype=float)
+        
         self.r_adj = xyzrpy2Mat(0, 0, 0, -np.pi, 0, -np.pi / 2)  # 将手柄坐标系调整到与ROS一致
+        
         self.ros_to_arm_mat = xyzrpy2Mat(
             float(ros_to_arm_xyz[0]),
             float(ros_to_arm_xyz[1]),

@@ -80,7 +80,7 @@ colcon build
 - 命令行输入：
 
 ```bash
-adb install 路径/teleop-debug.apk
+adb install ~/QuestArmTeleop/src/oculus_reader/APK/teleop-debug.apk
 ```
 
 等待一段时间后，终端输出 Success 即安装成功。
@@ -134,16 +134,52 @@ oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮
 
 ## 软件启动
 
-1、机械臂使能
+1、激活 CAN 模块
 
-**单piper使能**：
+**激活单 CAN**：
 
-将机械臂的can线接入电脑
+当电脑仅连接单个 CAN 模块时，可通过以下步骤快速完成激活：
+
+打开一个终端窗口，执行以下命令：
+
+```bash
+bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/can_activate.sh 
+```
+
+**激活双 CAN 模块**：
+
+先将连接左机械臂的的 CAN 模块接入电脑，
 
 然后执行：
 
 ```bash
-bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/can_activate.sh 
+bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/find_all_can_port.sh 
+```
+
+终端会出现左机械臂 CAN 的端口号，接着将右机械臂 CAN 模块接入电脑。
+
+再次执行：
+
+```bash
+bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/find_all_can_port.sh 
+```
+
+终端会出现右机械臂 CAN 的端口号。
+
+将这左右两个端口号复制到 can_config.sh 文件的 111 和 112 行，如下所示：
+
+```python
+if [ "$EXPECTED_CAN_COUNT" -ne 1 ]; then
+    declare -A USB_PORTS 
+    USB_PORTS["1-8.1:1.0"]="can_left:1000000"  #左 CAN
+    USB_PORTS["1-8.2:1.0"]="can_right:1000000" #右 CAN
+fi
+```
+
+保存完毕后，激活左右机械臂使能脚本：
+
+```bash
+bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/can_config.sh 
 ```
 
 2、启动遥操机械臂
@@ -155,12 +191,36 @@ source ~/QuestArmTeleop/install/setup.bash
 
 conda activate vt
 
-# 启动遥操nero
+# 启动遥操单nero（在开启遥操程序后，不要着急启动遥操，请仔细阅读下面的内容）
 ros2 launch  oculus_reader teleop_single_nero.launch.py 
 
-# 启动遥操 piper x
+# 启动遥操双nero （在开启遥操程序后，不要着急启动遥操，请仔细阅读下面的内容）
+ros2 launch  oculus_reader teleop_single_nero.launch.py 
+
+# 启动遥操 piper x （在开启遥操程序后，不要着急启动遥操，请仔细阅读下面的内容）
 ros2 launch  oculus_reader teleop_single_piper_x.launch.py
 ```
+
+在启动单臂遥操后，会出现 2 个 RVIZ 的可视化界面，一个界面用来显示手柄与 VR 头显的坐标，一个用来显示机械臂的模型，该模型会实时订阅机械臂当前反馈的各关节数据来显示到模型上面，保证了真机和模型关节状态的同步。
+
+穿戴方式：VR 头显佩戴在脖子上，双手握住左右手柄，摇杆面朝上。
+
+先看显示手柄与 VR 头显坐标系的 RVIZ 界面，按上述要求佩戴后，3个坐标系应做到如下图所示：
+
+![img error](img/3.png)
+
+**如左右手柄坐标系不在相应的坐标系，则需不断晃动手柄直到位置收敛至指定象限即可。**
+
+遥操是将手柄的 pose 值映射到机械臂夹爪末端上，所以要对其两者的坐标系，不然开启遥操后出现手柄往左边移动，机械臂往右边走的情况。
+
+再来看显示机械臂的 RVIZ 界面，可以看到，在 joint2 为 -30°，joint4 为 120°的初始位姿下
+的末端坐标系是跟手柄的坐标系是一样的：
+
+![img error](img/4.png)
+
+那么此时就可以开启遥操了。
+
+如果机械臂的末端坐标系跟手柄不对齐，那么可通过修改 launch 文件中 pub_pose_node 节点中的 ros_to_arm_rpy 参数调整手柄的坐标系与机械臂末端坐标系对齐。
 
 在启动遥操代码时出现该错误时：
 
@@ -179,7 +239,7 @@ Run `adb devices` to verify that the device is visible.
 
 3. 第一次开启程序，会出现上面的报错。
 
-4. 当设备上出现提示时，接受**允许 USB 调试**和**始终允许从此计算机进行。**
+4. 当设备上出现提示时，接受**允许 USB 调试**或点击**始终对这台电脑允许。**
 
    ![img error](img/1.png)
 
@@ -190,11 +250,12 @@ Run `adb devices` to verify that the device is visible.
 ## 操作说明
 
 > 注意⚠️：
->
+> - nero 机械臂需等电源处的指示灯变成绿色才可开启遥操程序，piper 系列机械臂无需等待。
 > - 请一定要确保VR屏幕保持常亮，否则 pose 会乱飘导致遥操作机械臂乱飞，我们建议在VR眼镜里面拿东西遮住感应器，使其保持常亮状态。
 > - 开启程序后，请一定要确保手柄在VR视野里以及rviz里面的坐标稳定不会乱飘，且手柄的TF坐标系是跟机械臂末端坐标系是对齐的（这部分需要在launch文件中修改ros_to_arm_rpy参数）方可开启遥操作。
 > - 手柄与机械臂末端的坐标系对齐很重要，这直接决定了遥操的体验感。
 > - 控制单臂需要用右手手柄，按住“A”键开始遥操，按住“B”键停止遥操。
+> - 控制双臂时：右手柄按住“A”开始/“B”停止右臂；左手柄按住“X”开始/“Y”停止左臂。
 > - 本程序支持无线遥操作，流程程度取决于你当下的网络连接速度。
 
 ## 手柄按键说明

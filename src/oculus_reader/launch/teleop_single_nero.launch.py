@@ -26,6 +26,7 @@ def generate_launch_description():
         launch_arguments={
             "can_port": "can0",
             "arm_type": "nero",
+            "auto_enable": "true",
             "effector_type": "agx_gripper",
             "tcp_offset": "[0.1755, 0.0, -0.0235, 0.0, 0.0, 0.0]",
             "control": "false",
