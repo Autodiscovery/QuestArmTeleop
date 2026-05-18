@@ -27,7 +27,7 @@ def generate_launch_description():
             "can_port": "can0",
             "arm_type": "piper_x",
             "effector_type": "agx_gripper",
-            "tcp_offset": "[0.1755, 0.0, -0.0235, 0.0, 0.0, 0.0]",
+            "tcp_offset": "[0.0, 0.0, 0.13, 0.0, 0.0, 0.0]",
             "control": "false",
             "fast_mode": "false",
         }.items(),
@@ -48,7 +48,7 @@ def generate_launch_description():
         executable="pub_pose.py",
         name="pub_pose_node",
         output="screen",
-        arguments=["--ros-args", "-p", "ros_to_arm_rpy:=[-1.5708, 0.0, 0.0]"],
+        arguments=["--ros-args", "-p", "ros_to_arm_rpy:=[-1.5708, 0.0, -1.5708]"],
     )
 
     # 4) ros2 run oculus_reader pub_delta_pose.py
