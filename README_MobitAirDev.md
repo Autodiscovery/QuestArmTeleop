@@ -47,10 +47,6 @@ cd ~/QuestArmTeleop
 
 source ./install/setup.bash 
 
-bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/can_activate.sh left_nero 1000000 "3-12.1.2:1.0" 
-
-bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/can_activate.sh right_nero 1000000 "3-12.1.4:1.0" 
-
 sudo bash ~/QuestArmTeleop/src/agx_arm_ros/scripts/can_muti_activate.sh 
 
 ros2 launch oculus_reader teleop_double_nero.launch.py 
