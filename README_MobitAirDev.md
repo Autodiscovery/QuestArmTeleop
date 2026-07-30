@@ -12,7 +12,7 @@ adb devices
 
 ### Building the workspace 
 
-# It needs a specific version of python for the Conda environment because of the ROS2 Jazzy requiring it 
+#### It needs a specific version of python for the Conda environment because of the ROS2 Jazzy requiring it 
 ```bash
 
 conda create -n vt python=3.12 
